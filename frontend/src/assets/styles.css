@@ -1,0 +1,59 @@
+:root {
+  --color-primary-dark: #173B57;
+  --color-primary: #2563EB;
+  --color-success: #16A34A;
+  --color-bg-light: #F3F4F6;
+  --color-white: #FFFFFF;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  background-color: var(--color-bg-light);
+  color: #1f2937;
+  min-height: 100vh;
+}
+
+.bg-brand-dark {
+  background-color: var(--color-primary-dark) !important;
+}
+
+.bg-brand-primary {
+  background-color: var(--color-primary) !important;
+}
+
+.bg-brand-success {
+  background-color: var(--color-success) !important;
+}
+
+.text-brand-dark {
+  color: var(--color-primary-dark) !important;
+}
+
+.text-brand-primary {
+  color: var(--color-primary) !important;
+}
+
+.btn-brand-primary {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #ffffff;
+}
+
+.btn-brand-primary:hover {
+  background-color: #1d4ed8;
+  border-color: #1d4ed8;
+  color: #ffffff;
+}
+
+.card-dashboard {
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card-dashboard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
+}
