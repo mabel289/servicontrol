@@ -18,6 +18,10 @@ import sincronizacionRoutes from './modules/sincronizacion/sincronizacion.routes
 import supervisionRoutes from './modules/supervision/supervision.routes.js';
 import reportesRoutes from './modules/reportes/reportes.routes.js';
 
+// Documentación OpenAPI / Swagger
+import swaggerUi from 'swagger-ui-express';
+import { swaggerSpec } from './config/swagger.js';
+
 const app = express();
 
 // Configuración de CORS
@@ -40,6 +44,9 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Carpeta pública para archivos estáticos (uploads de evidencias fotográficas)
 app.use('/uploads', express.static('uploads'));
+
+// Documentación interactiva Swagger
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Endpoint de verificación del estado del sistema y la base de datos (Health check)
 app.get('/api/health', async (req, res, next) => {
