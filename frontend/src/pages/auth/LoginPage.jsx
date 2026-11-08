@@ -130,6 +130,14 @@ export const LoginPage = () => {
             </button>
             <button
               type="button"
+              className="btn btn-sm btn-outline-primary text-start d-flex justify-content-between align-items-center"
+              onClick={() => autocompletarCredenciales('administrativo@servicontrol.com', 'Admin1234*')}
+            >
+              <span><strong>Administrativo:</strong> administrativo@servicontrol.com</span>
+              <span className="badge bg-primary">ADMINISTRATIVO</span>
+            </button>
+            <button
+              type="button"
               className="btn btn-sm btn-outline-warning text-dark text-start d-flex justify-content-between align-items-center"
               onClick={() => autocompletarCredenciales('supervisor@servicontrol.com', 'Supervisor123*')}
             >

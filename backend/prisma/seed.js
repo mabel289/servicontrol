@@ -24,6 +24,7 @@ async function main() {
   console.log('✅ Roles asegurados.');
 
   const rolAdmin = await prisma.rol.findUnique({ where: { nombre: RolNombre.ADMINISTRADOR } });
+  const rolAdministrativo = await prisma.rol.findUnique({ where: { nombre: RolNombre.ADMINISTRATIVO } });
   const rolSupervisor = await prisma.rol.findUnique({ where: { nombre: RolNombre.SUPERVISOR } });
   const rolOperario = await prisma.rol.findUnique({ where: { nombre: RolNombre.OPERARIO } });
 
@@ -43,6 +44,23 @@ async function main() {
     }
   });
   console.log(`✅ Administrador creado: ${adminUser.email} (Password: Admin1234*)`);
+
+  // 2.1 Crear Usuario Administrativo inicial
+  const adminisPasswordHash = await bcrypt.hash('Admin1234*', 10);
+  const administrativoUser = await prisma.usuario.upsert({
+    where: { email: 'administrativo@servicontrol.com' },
+    update: {},
+    create: {
+      email: 'administrativo@servicontrol.com',
+      password: adminisPasswordHash,
+      nombres: 'Laura Sofía',
+      apellidos: 'Méndez Rincón',
+      telefono: '3124567890',
+      rolId: rolAdministrativo.id,
+      activo: true
+    }
+  });
+  console.log(`✅ Administrativo creado: ${administrativoUser.email} (Password: Admin1234*)`);
 
   // 3. Crear Usuario Supervisor inicial
   const supPasswordHash = await bcrypt.hash('Supervisor123*', 10);

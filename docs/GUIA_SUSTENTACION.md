@@ -97,6 +97,7 @@ Para demostrar en vivo la aplicación frente a tu profesor, sigue este orden:
 | Rol | Correo Electrónico | Contraseña | Perfil y Acceso |
 |---|---|---|---|
 | **ADMINISTRADOR** | `admin@servicontrol.com` | `Admin1234*` | Acceso total, programación, usuarios, hojas de vida y reportes. |
+| **ADMINISTRATIVO** | `administrativo@servicontrol.com` | `Admin1234*` | Personal de oficina: programación semanal, gestión de operarios y centros de trabajo. |
 | **SUPERVISOR** | `supervisor@servicontrol.com` | `Supervisor123*` | Inspección presencial, galería de fotos, aprobación y rechazo de trabajos. |
 | **OPERARIO** | `operario1@servicontrol.com` | `Operario123*` | Jornada móvil simplificada, asistencia, ejecución y evidencias offline. |
 
