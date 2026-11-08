@@ -99,3 +99,4 @@ export class OperariosService {
     return hojaVida;
   }
 }
+

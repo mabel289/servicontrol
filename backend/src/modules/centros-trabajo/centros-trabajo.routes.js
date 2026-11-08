@@ -16,3 +16,4 @@ router.get('/:id', CentrosTrabajoController.obtenerPorId);
 router.post('/', authorize('ADMINISTRADOR', 'ADMINISTRATIVO'), CentrosTrabajoController.crear);
 
 export default router;
+

@@ -47,3 +47,4 @@ export const asignarActividadSchema = z.object({
 export const cambiarEstadoAsignacionSchema = z.object({
   estado: z.nativeEnum(EstadoActividad, { errorMap: () => ({ message: 'Estado de actividad inválido' }) })
 });
+

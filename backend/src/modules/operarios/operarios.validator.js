@@ -15,3 +15,4 @@ export const actualizarHojaVidaSchema = z.object({
     .string()
     .optional()
 });
+

@@ -13,3 +13,4 @@ export const centrosService = {
     return res.data.centro;
   }
 };
+

@@ -16,3 +16,4 @@ export const operariosService = {
     return res.data.hojaVida;
   }
 };
+
