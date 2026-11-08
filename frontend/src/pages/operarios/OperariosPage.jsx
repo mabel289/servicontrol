@@ -3,6 +3,7 @@ import { operariosService } from '../../services/operariosService';
 
 export const OperariosPage = () => {
   const [operarios, setOperarios] = useState([]);
+  const [busqueda, setBusqueda] = useState('');
   const [loading, setLoading] = useState(true);
   const [operarioSeleccionado, setOperarioSeleccionado] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -61,6 +62,11 @@ export const OperariosPage = () => {
     }
   };
 
+  const operariosFiltrados = operarios.filter((op) => {
+    const texto = `${op.codigoInstitucional} ${op.usuario?.nombres} ${op.usuario?.apellidos} ${op.usuario?.email} ${op.hojaVida?.numeroIdentificacion || ''}`.toLowerCase();
+    return texto.includes(busqueda.toLowerCase());
+  });
+
   return (
     <div className="container-fluid px-4 my-4">
       <div className="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
@@ -90,9 +96,23 @@ export const OperariosPage = () => {
       )}
 
       <div className="card card-dashboard bg-white overflow-hidden">
-        <div className="p-3 border-bottom d-flex justify-content-between align-items-center bg-light">
-          <h2 className="h6 fw-bold text-brand-dark m-0">Personal de Operarios Registrado</h2>
-          <span className="badge bg-success">{operarios.length} Operarios</span>
+        <div className="p-3 border-bottom d-flex justify-content-between align-items-center flex-wrap gap-2 bg-light">
+          <div className="d-flex align-items-center gap-2">
+            <h2 className="h6 fw-bold text-brand-dark m-0">Personal de Operarios Registrado</h2>
+            <span className="badge bg-success">{operariosFiltrados.length} de {operarios.length}</span>
+          </div>
+          <div className="input-group" style={{ maxWidth: '320px' }}>
+            <span className="input-group-text bg-white border-end-0 text-secondary">
+              <i className="bi bi-search"></i>
+            </span>
+            <input
+              type="text"
+              className="form-control form-control-sm border-start-0"
+              placeholder="Buscar por nombre, código o cédula..."
+              value={busqueda}
+              onChange={(e) => setBusqueda(e.target.value)}
+            />
+          </div>
         </div>
 
         <div className="table-responsive">
@@ -116,14 +136,14 @@ export const OperariosPage = () => {
                     Cargando listado de operarios...
                   </td>
                 </tr>
-              ) : operarios.length === 0 ? (
+              ) : operariosFiltrados.length === 0 ? (
                 <tr>
                   <td colSpan="7" className="text-center py-4 text-secondary">
-                    No hay operarios registrados en el sistema.
+                    {busqueda ? 'No se encontraron operarios con el criterio de búsqueda.' : 'No hay operarios registrados en el sistema.'}
                   </td>
                 </tr>
               ) : (
-                operarios.map((op) => (
+                operariosFiltrados.map((op) => (
                   <tr key={op.id}>
                     <td>
                       <span className="badge bg-primary-subtle text-primary border border-primary-subtle fw-bold">
