@@ -31,3 +31,4 @@ npm install
 npm run dev
 ```
 La aplicación web estará disponible en `http://localhost:5173`.
+

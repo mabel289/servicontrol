@@ -128,21 +128,147 @@ flowchart TD
 
 ---
 
-## 7. Diagrama Entidad-Relación (BD Relacional)
-*(Se desarrollará en detalle en la Etapa 2 con Prisma ORM)*
+## 7. Diagrama Entidad-Relación (BD Relacional en PostgreSQL)
 
-Entidades Clave:
-- `Rol` (1:N) `Usuario`
-- `Usuario` (1:1) `Operario` | `Supervisor` | `Administrador`
-- `Operario` (1:1) `HojaVida`
-- `CentroTrabajo` (Conjuntos residenciales)
-- `TipoActividad` (Piscina, Jardinería, Pintura, Aseo, etc.)
-- `Programacion` (Semana y Centro de Trabajo)
-- `Asignacion` (Programación + Operario + Horario de/hasta)
-- `Asistencia` (Operario + CentroTrabajo + Entrada + Salida)
-- `EjecucionActividad` (Asignación + Estado: PROGRAMADA, EN_PROCESO, PENDIENTE_REVISION, APROBADA, RECHAZADA)
-- `EvidenciaFotografica` (EjecucionActividad + Tipo: ANTES, DURANTE, DESPUES + URL + Hash)
-- `RevisionSupervisor` (EjecucionActividad + Supervisor + Aprobado/Rechazado + Observación)
+```mermaid
+erDiagram
+    ROL ||--o{ USUARIO : tiene
+    USUARIO ||--o| OPERARIO : perfil_operario
+    USUARIO ||--o| SUPERVISOR : perfil_supervisor
+    OPERARIO ||--|| HOJA_VIDA : posee
+    
+    CENTRO_TRABAJO ||--o{ ASIGNACION_ACTIVIDAD : recibe
+    CENTRO_TRABAJO ||--o{ ASISTENCIA : registra
+    OPERARIO ||--o{ ASISTENCIA : marca
+    OPERARIO ||--o{ ASIGNACION_ACTIVIDAD : realiza
+    
+    PROGRAMACION_SEMANAL ||--o{ ASIGNACION_ACTIVIDAD : contiene
+    TIPO_ACTIVIDAD ||--o{ ASIGNACION_ACTIVIDAD : categoriza
+    
+    ASIGNACION_ACTIVIDAD ||--o| EJECUCION_ACTIVIDAD : ejecuta
+    EJECUCION_ACTIVIDAD ||--o{ EVIDENCIA_FOTOGRAFICA : documenta
+    EJECUCION_ACTIVIDAD ||--o{ REVISION_SUPERVISOR : evaluada_por
+    SUPERVISOR ||--o{ REVISION_SUPERVISOR : emite
+
+    ROL {
+        int id PK
+        string nombre UK
+        string descripcion
+    }
+
+    USUARIO {
+        string id PK
+        string email UK
+        string password
+        string nombres
+        string apellidos
+        string telefono
+        boolean activo
+        int rolId FK
+    }
+
+    OPERARIO {
+        string id PK
+        string usuarioId FK,UK
+        string codigoInstitucional UK
+        enum estadoLaboral
+    }
+
+    HOJA_VIDA {
+        string id PK
+        string operarioId FK,UK
+        string numeroIdentificacion UK
+        string direccion
+        datetime fechaIngreso
+        text formacionAcademica
+        text experienciaLaboral
+    }
+
+    SUPERVISOR {
+        string id PK
+        string usuarioId FK,UK
+        string codigoSupervisor UK
+        boolean activo
+    }
+
+    CENTRO_TRABAJO {
+        string id PK
+        string nombre
+        string direccion
+        string ciudad
+        string telefonoContacto
+        string nombreAdministrador
+        boolean activo
+    }
+
+    TIPO_ACTIVIDAD {
+        int id PK
+        string nombre UK
+        string descripcion
+        boolean activo
+    }
+
+    PROGRAMACION_SEMANAL {
+        string id PK
+        string semana UK
+        datetime fechaInicio
+        datetime fechaFin
+        enum estado
+    }
+
+    ASIGNACION_ACTIVIDAD {
+        string id PK
+        string programacionId FK
+        string centroTrabajoId FK
+        string operarioId FK
+        int tipoActividadId FK
+        date fecha
+        string horaInicioEstimada
+        string horaFinEstimada
+        text instrucciones
+        enum estado
+    }
+
+    ASISTENCIA {
+        string id PK
+        string operarioId FK
+        string centroTrabajoId FK
+        date fecha
+        datetime horaEntrada
+        datetime horaSalida
+        int minutosPermanencia
+        string syncUuid UK
+        enum estadoSync
+    }
+
+    EJECUCION_ACTIVIDAD {
+        string id PK
+        string asignacionId FK,UK
+        datetime horaInicioReal
+        datetime horaFinReal
+        enum estado
+        string syncUuid UK
+    }
+
+    EVIDENCIA_FOTOGRAFICA {
+        string id PK
+        string ejecucionId FK
+        enum tipoEvidencia
+        string urlArchivo
+        int pesoBytes
+        string syncUuid UK
+        datetime fechaCaptura
+    }
+
+    REVISION_SUPERVISOR {
+        string id PK
+        string ejecucionId FK
+        string supervisorId FK
+        enum estado
+        text observaciones
+        datetime fechaRevision
+    }
+```
 
 ---
 
@@ -198,3 +324,4 @@ flowchart TB
 | **D1** | Operarios sin cobertura celular ni Wi-Fi en conjuntos cerrados. | 1. Exigir plan de datos empresarial.<br>2. Aplicación móvil nativa en Java/Kotlin.<br>3. PWA con Service Worker e IndexedDB. | **PWA con IndexedDB** | Los operarios usan sus propios celulares (gama baja/media). PWA no requiere instalación por tienda, es multiplataforma y IndexedDB soporta almacenamiento local de fotos y cola de sincronización. |
 | **D2** | Almacenamiento de evidencias fotográficas en alta resolución. | 1. Guardar Base64/BYTEA en PostgreSQL.<br>2. Sistema de archivos local + metadatos en BD.<br>3. Cloud Storage (AWS S3). | **Sistema de archivos local + Metadatos en PostgreSQL** | Guardar binarios en BD degrada severamente el rendimiento de las consultas y satura los backups. El almacenamiento en disco con compresión cliente optimiza espacio y PostgreSQL solo guarda URLs y metadatos. |
 | **D3** | Prevención de duplicados en la sincronización tras cortes de red. | 1. Auto-incrementales del servidor.<br>2. Identificadores UUID v4 generados en el cliente con upsert. | **UUID v4 cliente + Sincronización Idempotente** | Al generarse el UUID en el dispositivo desconectado, reintentar una sincronización fallida no crea duplicados en el servidor gracias a la restricción `UNIQUE (uuid)`. |
+

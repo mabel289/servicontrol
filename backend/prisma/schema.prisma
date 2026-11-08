@@ -1,0 +1,338 @@
+// Schema Prisma para ServiControl
+// Sistema de Gestión y Seguimiento de Servicios Locativos
+// Taller de Ingeniería de Software Orientada a Objetos
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// -------------------------------------------------------------
+// ENUMS
+// -------------------------------------------------------------
+
+enum RolNombre {
+  ADMINISTRADOR
+  ADMINISTRATIVO
+  OPERARIO
+  SUPERVISOR
+}
+
+enum EstadoLaboral {
+  ACTIVO
+  INACTIVO
+  SUSPENDIDO
+}
+
+enum EstadoProgramacion {
+  BORRADOR
+  PUBLICADA
+  CANCELADA
+}
+
+enum EstadoActividad {
+  PROGRAMADA
+  EN_PROCESO
+  PENDIENTE_REVISION
+  APROBADA
+  RECHAZADA
+}
+
+enum TipoEvidenciaFoto {
+  ANTES
+  DURANTE
+  DESPUES
+}
+
+enum EstadoSync {
+  PENDIENTE
+  SINCRONIZANDO
+  SINCRONIZADO
+  ERROR
+}
+
+enum EstadoRevision {
+  APROBADA
+  RECHAZADA
+}
+
+// -------------------------------------------------------------
+// MODELO: AUTENTICACIÓN, USUARIOS Y ROLES
+// -------------------------------------------------------------
+
+model Rol {
+  id          Int        @id @default(autoincrement())
+  nombre      RolNombre  @unique
+  descripcion String?
+  usuarios    Usuario[]
+
+  @@map("roles")
+}
+
+model Usuario {
+  id                 String       @id @default(uuid())
+  email              String       @unique
+  password           String       // Hash con bcrypt
+  nombres            String
+  apellidos          String
+  telefono           String?
+  activo             Boolean      @default(true)
+  rolId              Int
+  rol                Rol          @relation(fields: [rolId], references: [id])
+  
+  // Recuperación de contraseña
+  resetToken         String?
+  resetTokenExpires  DateTime?
+
+  // Relaciones 1 a 1 especializadas
+  operario           Operario?
+  supervisor         Supervisor?
+
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+
+  @@map("usuarios")
+}
+
+// -------------------------------------------------------------
+// MODELO: OPERARIOS Y HOJA DE VIDA
+// -------------------------------------------------------------
+
+model Operario {
+  id                   String        @id @default(uuid())
+  usuarioId            String        @unique
+  usuario              Usuario       @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  codigoInstitucional  String        @unique
+  estadoLaboral        EstadoLaboral @default(ACTIVO)
+
+  hojaVida             HojaVida?
+  asignaciones         AsignacionActividad[]
+  asistencias          Asistencia[]
+
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+
+  @@map("operarios")
+}
+
+model HojaVida {
+  id                   String       @id @default(uuid())
+  operarioId           String       @unique
+  operario             Operario     @relation(fields: [operarioId], references: [id], onDelete: Cascade)
+  numeroIdentificacion String       @unique
+  direccion            String
+  fechaIngreso         DateTime     @default(now())
+  formacionAcademica   String       @db.Text
+  experienciaLaboral   String       @db.Text
+  documentosUrl        String?
+  
+  createdAt            DateTime     @default(now())
+  updatedAt            DateTime     @updatedAt
+
+  @@map("hojas_vida")
+}
+
+// -------------------------------------------------------------
+// MODELO: SUPERVISORES
+// -------------------------------------------------------------
+
+model Supervisor {
+  id               String               @id @default(uuid())
+  usuarioId        String               @unique
+  usuario          Usuario              @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  codigoSupervisor String               @unique
+  activo           Boolean              @default(true)
+
+  revisiones       RevisionSupervisor[]
+
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+
+  @@map("supervisores")
+}
+
+// -------------------------------------------------------------
+// MODELO: CENTROS DE TRABAJO (CONJUNTOS RESIDENCIALES)
+// -------------------------------------------------------------
+
+model CentroTrabajo {
+  id                  String                @id @default(uuid())
+  nombre              String                // Nombre del conjunto residencial
+  direccion           String
+  ciudad              String                @default("Bogotá")
+  telefonoContacto    String?
+  nombreAdministrador String?
+  activo              Boolean               @default(true)
+
+  asignaciones        AsignacionActividad[]
+  asistencias         Asistencia[]
+
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+
+  @@map("centros_trabajo")
+}
+
+// -------------------------------------------------------------
+// MODELO: CATÁLOGO DE ACTIVIDADES
+// -------------------------------------------------------------
+
+model TipoActividad {
+  id           Int                   @id @default(autoincrement())
+  nombre       String                @unique // Piscina, Jardinería, Pintura, Aseo, etc.
+  descripcion  String?
+  activo       Boolean               @default(true)
+
+  asignaciones AsignacionActividad[]
+
+  @@map("tipos_actividad")
+}
+
+// -------------------------------------------------------------
+// MODELO: PROGRAMACIÓN SEMANAL Y ASIGNACIONES
+// -------------------------------------------------------------
+
+model ProgramacionSemanal {
+  id                String                @id @default(uuid())
+  semana            String                // Código identificador e.g. "2026-W45"
+  fechaInicio       DateTime              // Lunes
+  fechaFin          DateTime              // Viernes
+  estado            EstadoProgramacion    @default(BORRADOR)
+  observaciones     String?               @db.Text
+
+  asignaciones      AsignacionActividad[]
+
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
+
+  @@unique([semana])
+  @@map("programaciones_semanales")
+}
+
+model AsignacionActividad {
+  id                  String              @id @default(uuid())
+  programacionId      String
+  programacion        ProgramacionSemanal @relation(fields: [programacionId], references: [id], onDelete: Cascade)
+  centroTrabajoId     String
+  centroTrabajo       CentroTrabajo       @relation(fields: [centroTrabajoId], references: [id])
+  operarioId          String
+  operario            Operario            @relation(fields: [operarioId], references: [id])
+  tipoActividadId     Int
+  tipoActividad       TipoActividad       @relation(fields: [tipoActividadId], references: [id])
+  
+  fecha               DateTime            @db.Date
+  horaInicioEstimada  String              // Formato "HH:mm" ej "08:00"
+  horaFinEstimada     String              // Formato "HH:mm" ej "12:00"
+  instrucciones       String?             @db.Text
+  estado              EstadoActividad     @default(PROGRAMADA)
+
+  ejecucion           EjecucionActividad?
+
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+
+  // Índices para detección rápida de cruces de horario
+  @@index([operarioId, fecha])
+  @@index([centroTrabajoId, fecha])
+  @@map("asignaciones_actividades")
+}
+
+// -------------------------------------------------------------
+// MODELO: ASISTENCIA (ENTRADAS Y SALIDAS)
+// -------------------------------------------------------------
+
+model Asistencia {
+  id                 String        @id @default(uuid())
+  operarioId         String
+  operario           Operario      @relation(fields: [operarioId], references: [id])
+  centroTrabajoId    String
+  centroTrabajo      CentroTrabajo @relation(fields: [centroTrabajoId], references: [id])
+  
+  fecha              DateTime      @db.Date
+  horaEntrada        DateTime
+  horaSalida         DateTime?
+  minutosPermanencia Int?          // Calculado al registrar la salida
+
+  // Campos para soporte Offline e idempotencia
+  syncUuid           String        @unique // UUID generado en el dispositivo móvil
+  estadoSync         EstadoSync    @default(SINCRONIZADO)
+
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  @@index([operarioId, fecha])
+  @@map("asistencias")
+}
+
+// -------------------------------------------------------------
+// MODELO: EJECUCIÓN REAL Y EVIDENCIAS FOTOGRÁFICAS
+// -------------------------------------------------------------
+
+model EjecucionActividad {
+  id                    String                @id @default(uuid())
+  asignacionId          String                @unique
+  asignacion            AsignacionActividad   @relation(fields: [asignacionId], references: [id], onDelete: Cascade)
+  
+  horaInicioReal        DateTime
+  horaFinReal           DateTime?
+  estado                EstadoActividad       @default(EN_PROCESO)
+  observacionesOperario String?               @db.Text
+
+  // Idempotencia offline
+  syncUuid              String                @unique
+  estadoSync            EstadoSync            @default(SINCRONIZADO)
+
+  evidencias            EvidenciaFotografica[]
+  revisiones            RevisionSupervisor[]
+
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+
+  @@map("ejecuciones_actividades")
+}
+
+model EvidenciaFotografica {
+  id            String             @id @default(uuid())
+  ejecucionId   String
+  ejecucion     EjecucionActividad @relation(fields: [ejecucionId], references: [id], onDelete: Cascade)
+  
+  tipoEvidencia TipoEvidenciaFoto  // ANTES, DURANTE, DESPUES
+  urlArchivo    String             // Ruta relativa almacenada en backend/uploads/
+  nombreArchivo String
+  pesoBytes     Int
+  mimeType      String             @default("image/jpeg")
+  fechaCaptura  DateTime
+
+  // Idempotencia offline para evitar fotos duplicadas
+  syncUuid      String             @unique
+
+  createdAt     DateTime           @default(now())
+
+  @@index([ejecucionId, tipoEvidencia])
+  @@map("evidencias_fotograficas")
+}
+
+// -------------------------------------------------------------
+// MODELO: SUPERVISIÓN Y CONTROL DE CALIDAD
+// -------------------------------------------------------------
+
+model RevisionSupervisor {
+  id            String             @id @default(uuid())
+  ejecucionId   String
+  ejecucion     EjecucionActividad @relation(fields: [ejecucionId], references: [id], onDelete: Cascade)
+  supervisorId  String
+  supervisor    Supervisor         @relation(fields: [supervisorId], references: [id])
+  
+  estado        EstadoRevision     // APROBADA o RECHAZADA
+  observaciones String             @db.Text // Obligatoria si es rechazada
+  fechaRevision DateTime           @default(now())
+
+  createdAt     DateTime           @default(now())
+
+  @@map("revisiones_supervisores")
+}
+

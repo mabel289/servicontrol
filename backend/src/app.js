@@ -3,6 +3,7 @@ import cors from 'cors';
 import { env } from './config/environment.js';
 import { AppError } from './utils/appError.js';
 import { errorHandler } from './middlewares/errorHandler.js';
+import prisma from './database/prisma.js';
 
 const app = express();
 
@@ -27,18 +28,35 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // Carpeta pública para archivos estáticos (uploads de evidencias fotográficas)
 app.use('/uploads', express.static('uploads'));
 
-// Endpoint de verificación del estado del sistema (Health check)
-app.get('/api/health', (req, res) => {
-  res.status(200).json({
-    status: 'success',
-    data: {
-      sistema: 'ServiControl API',
-      version: '1.0.0',
-      entorno: env.nodeEnv,
-      tiempoActivoSegundos: Math.floor(process.uptime()),
-      timestamp: new Date().toISOString()
-    }
-  });
+// Endpoint de verificación del estado del sistema y la base de datos (Health check)
+app.get('/api/health', async (req, res, next) => {
+  try {
+    // Comprobar conexión viva con PostgreSQL mediante Prisma
+    const [rolesCount, usuariosCount] = await Promise.all([
+      prisma.rol.count(),
+      prisma.usuario.count()
+    ]);
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        sistema: 'ServiControl API',
+        version: '1.0.0',
+        entorno: env.nodeEnv,
+        tiempoActivoSegundos: Math.floor(process.uptime()),
+        baseDatos: {
+          motor: 'PostgreSQL 17',
+          orm: 'Prisma 6',
+          estado: 'CONECTADO',
+          rolesRegistrados: rolesCount,
+          usuariosRegistrados: usuariosCount
+        },
+        timestamp: new Date().toISOString()
+      }
+    });
+  } catch (error) {
+    next(new AppError(`Error conectando con la base de datos: ${error.message}`, 500));
+  }
 });
 
 // Manejo de rutas no encontradas (404)

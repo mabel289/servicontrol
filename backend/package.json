@@ -6,7 +6,11 @@
   "main": "src/server.js",
   "scripts": {
     "start": "node --env-file=.env src/server.js",
-    "dev": "node --env-file=.env --watch src/server.js"
+    "dev": "node --env-file=.env --watch src/server.js",
+    "seed": "node --env-file=.env prisma/seed.js"
+  },
+  "prisma": {
+    "seed": "node --env-file=.env prisma/seed.js"
   },
   "keywords": [
     "servicontrol",
@@ -18,7 +22,12 @@
   "author": "ServiControl Team",
   "license": "ISC",
   "dependencies": {
+    "@prisma/client": "^6.19.3",
+    "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
     "express": "^5.3.0"
+  },
+  "devDependencies": {
+    "prisma": "^6.19.3"
   }
 }
