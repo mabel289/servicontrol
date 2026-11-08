@@ -1,17 +1,38 @@
 :root {
-  --color-primary-dark: #173B57;
-  --color-primary: #2563EB;
-  --color-success: #16A34A;
-  --color-bg-light: #F3F4F6;
-  --color-white: #FFFFFF;
+  --color-primary-dark: #12283a;
+  --color-primary: #1e5bb8;
+  --color-success: #15803d;
+  --color-bg-light: #f8fafc;
+  --color-white: #ffffff;
 }
 
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   background-color: var(--color-bg-light);
-  color: #1f2937;
+  color: #334155;
   min-height: 100vh;
+  letter-spacing: -0.011em;
+}
+
+h1, h2, h3, h4, h5, h6,
+.navbar-brand,
+.btn,
+.badge,
+.nav-link {
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  letter-spacing: -0.022em;
+}
+
+.table th {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+  color: #64748b;
 }
 
 .bg-brand-dark {
@@ -46,15 +67,39 @@ body {
   color: #ffffff;
 }
 
+.btn {
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 0.45rem 0.95rem;
+  transition: all 0.15s ease-in-out;
+}
+
 .card-dashboard {
-  border: none;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  border-radius: 10px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
 .card-dashboard:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  border-color: rgba(203, 213, 225, 1);
+}
+
+.badge {
+  font-weight: 600;
+  border-radius: 6px;
+  padding: 0.35em 0.65em;
+}
+
+.form-control, .form-select {
+  border-radius: 8px;
+  border-color: #cbd5e1;
+  font-size: 0.925rem;
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
