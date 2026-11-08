@@ -1,37 +1,50 @@
 :root {
-  --color-primary-dark: #12283a;
-  --color-primary: #1e5bb8;
+  --color-primary-dark: #1b2e44;
+  --color-primary: #2b6cb0;
   --color-success: #15803d;
-  --color-bg-light: #f8fafc;
+  --color-bg-light: #fbfcfe;
   --color-white: #ffffff;
 }
 
 body {
   margin: 0;
-  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: 'Mulish', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: var(--color-bg-light);
   color: #334155;
   min-height: 100vh;
-  letter-spacing: -0.011em;
+  letter-spacing: -0.005em;
+  font-weight: 400;
 }
 
+/* Tipografía sutil y elegante con Forum para encabezados y marca */
 h1, h2, h3, h4, h5, h6,
 .navbar-brand,
-.btn,
-.badge,
+.modal-title {
+  font-family: 'Forum', Georgia, 'Times New Roman', serif;
+  font-weight: 400;
+  letter-spacing: 0.025em;
+  color: #1e293b;
+}
+
+.navbar-brand {
+  font-size: 1.45rem;
+  letter-spacing: 0.04em;
+}
+
 .nav-link {
-  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-  letter-spacing: -0.022em;
+  font-family: 'Mulish', sans-serif;
+  font-weight: 500;
+  letter-spacing: 0.01em;
 }
 
 .table th {
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  font-weight: 600;
+  font-family: 'Mulish', sans-serif;
+  font-weight: 700;
   text-transform: uppercase;
   font-size: 0.72rem;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
   color: #64748b;
 }
 
