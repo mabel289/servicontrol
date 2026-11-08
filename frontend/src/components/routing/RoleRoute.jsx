@@ -29,3 +29,4 @@ export const RoleRoute = ({ allowedRoles }) => {
 
   return <Outlet />;
 };
+

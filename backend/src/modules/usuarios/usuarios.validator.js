@@ -28,3 +28,4 @@ export const crearUsuarioSchema = z.object({
 export const cambiarEstadoUsuarioSchema = z.object({
   activo: z.boolean({ required_error: 'El estado activo (true/false) es obligatorio' })
 });
+

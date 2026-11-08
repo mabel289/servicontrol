@@ -21,3 +21,4 @@ export const validate = (schema, property = 'body') => (req, res, next) => {
     next(new AppError('Los datos suministrados no superan la validación', 400, errorDetails));
   }
 };
+

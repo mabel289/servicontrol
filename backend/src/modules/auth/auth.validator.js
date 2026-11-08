@@ -18,3 +18,4 @@ export const cambiarPasswordSchema = z.object({
     .string({ required_error: 'La nueva contraseña es obligatoria' })
     .min(8, 'La nueva contraseña debe tener mínimo 8 caracteres')
 });
+

@@ -8,6 +8,9 @@ import prisma from './database/prisma.js';
 // Importación de rutas modulares
 import authRoutes from './modules/auth/auth.routes.js';
 import usuariosRoutes from './modules/usuarios/usuarios.routes.js';
+import centrosTrabajoRoutes from './modules/centros-trabajo/centros-trabajo.routes.js';
+import operariosRoutes from './modules/operarios/operarios.routes.js';
+import programacionRoutes from './modules/programacion/programacion.routes.js';
 
 const app = express();
 
@@ -66,6 +69,9 @@ app.get('/api/health', async (req, res, next) => {
 // Rutas de la API REST
 app.use('/api/auth', authRoutes);
 app.use('/api/usuarios', usuariosRoutes);
+app.use('/api/centros-trabajo', centrosTrabajoRoutes);
+app.use('/api/operarios', operariosRoutes);
+app.use('/api/programacion', programacionRoutes);
 
 // Manejo de rutas no encontradas (404)
 app.use((req, res, next) => {
