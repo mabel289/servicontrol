@@ -31,9 +31,9 @@ export const Navbar = () => {
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-brand-dark px-3 px-md-4 shadow-sm sticky-top">
       <div className="container-fluid">
-        <Link className="navbar-brand d-flex align-items-center gap-2 fw-bold" to="/">
-          <i className="bi bi-shield-check text-primary fs-4"></i>
-          <span>ServiControl</span>
+        <Link className="navbar-brand d-flex align-items-center gap-2 fw-bold text-white" to="/">
+          <i className="bi bi-shield-check text-white fs-4"></i>
+          <span className="text-white">ServiControl</span>
         </Link>
 
         {user && (

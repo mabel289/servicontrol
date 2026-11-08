@@ -18,9 +18,8 @@ body {
   font-weight: 400;
 }
 
-/* Tipografía sutil y elegante con Forum para encabezados y marca */
+/* Tipografía sutil y elegante con Forum para encabezados */
 h1, h2, h3, h4, h5, h6,
-.navbar-brand,
 .modal-title {
   font-family: 'Forum', Georgia, 'Times New Roman', serif;
   font-weight: 400;
@@ -29,8 +28,16 @@ h1, h2, h3, h4, h5, h6,
 }
 
 .navbar-brand {
+  font-family: 'Forum', Georgia, 'Times New Roman', serif;
   font-size: 1.45rem;
   letter-spacing: 0.04em;
+  color: #ffffff !important;
+}
+
+.navbar-brand:hover,
+.navbar-brand:focus {
+  color: #ffffff !important;
+  opacity: 0.95;
 }
 
 .nav-link {
