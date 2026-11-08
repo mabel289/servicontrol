@@ -13,3 +13,4 @@ router.post('/salida', authorize('OPERARIO'), AsistenciaController.registrarSali
 router.get('/hoy', authorize('OPERARIO'), AsistenciaController.hoy);
 
 export default router;
+

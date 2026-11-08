@@ -73,3 +73,4 @@ export class SincronizacionService {
     return resultado;
   }
 }
+

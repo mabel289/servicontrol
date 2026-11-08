@@ -11,3 +11,4 @@ router.use(authenticate);
 router.post('/lote', authorize('OPERARIO'), SincronizacionController.sincronizarLote);
 
 export default router;
+

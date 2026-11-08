@@ -9,6 +9,8 @@ import { DashboardPage } from './pages/dashboard/DashboardPage';
 import { ProgramacionPage } from './pages/programacion/ProgramacionPage';
 import { OperariosPage } from './pages/operarios/OperariosPage';
 import { JornadaOperarioPage } from './pages/operario/JornadaOperarioPage';
+import { SupervisionPage } from './pages/supervision/SupervisionPage';
+import { ReportesPage } from './pages/reportes/ReportesPage';
 
 export default function App() {
   return (
@@ -26,10 +28,12 @@ export default function App() {
                 <Route element={<ProtectedRoute />}>
                   <Route path="/" element={<DashboardPage />} />
 
-                  {/* Rutas de Gestión: Administrador y Supervisor */}
+                  {/* Rutas de Gestión y Supervisión */}
                   <Route element={<RoleRoute allowedRoles={['ADMINISTRADOR', 'ADMINISTRATIVO', 'SUPERVISOR']} />}>
                     <Route path="/programacion" element={<ProgramacionPage />} />
+                    <Route path="/supervision" element={<SupervisionPage />} />
                     <Route path="/operarios" element={<OperariosPage />} />
+                    <Route path="/reportes" element={<ReportesPage />} />
                   </Route>
 
                   {/* Rutas de Campo Móvil: Operario */}

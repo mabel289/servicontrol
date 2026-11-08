@@ -15,6 +15,8 @@ import asistenciaRoutes from './modules/asistencia/asistencia.routes.js';
 import ejecucionRoutes from './modules/ejecucion/ejecucion.routes.js';
 import evidenciasRoutes from './modules/evidencias/evidencias.routes.js';
 import sincronizacionRoutes from './modules/sincronizacion/sincronizacion.routes.js';
+import supervisionRoutes from './modules/supervision/supervision.routes.js';
+import reportesRoutes from './modules/reportes/reportes.routes.js';
 
 const app = express();
 
@@ -80,6 +82,8 @@ app.use('/api/asistencia', asistenciaRoutes);
 app.use('/api/ejecucion', ejecucionRoutes);
 app.use('/api/evidencias', evidenciasRoutes);
 app.use('/api/sincronizacion', sincronizacionRoutes);
+app.use('/api/supervision', supervisionRoutes);
+app.use('/api/reportes', reportesRoutes);
 
 // Manejo de rutas no encontradas (404)
 app.use((req, res, next) => {

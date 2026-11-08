@@ -12,3 +12,4 @@ router.post('/iniciar', authorize('OPERARIO'), EjecucionController.iniciar);
 router.post('/finalizar', authorize('OPERARIO'), EjecucionController.finalizar);
 
 export default router;
+

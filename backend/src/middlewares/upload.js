@@ -32,3 +32,4 @@ export const uploadFoto = multer({
     fileSize: 10 * 1024 * 1024 // Máximo 10 MB
   }
 });
+

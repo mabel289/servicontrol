@@ -59,3 +59,4 @@ export const compressImage = (file, maxWidth = 1280, quality = 0.7) => {
     reader.onerror = (err) => reject(new Error('Fallo en lectura de archivo: ' + err.message));
   });
 };
+
