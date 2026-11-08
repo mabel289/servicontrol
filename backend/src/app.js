@@ -54,8 +54,14 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // Carpeta pública para archivos estáticos (uploads de evidencias fotográficas)
 app.use('/uploads', express.static('uploads'));
 
-// Documentación interactiva Swagger
-app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+// Documentación interactiva Swagger (segura para entornos locales y serverless)
+if (swaggerSpec && swaggerSpec.openapi) {
+  try {
+    app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+  } catch (err) {
+    console.warn('[Swagger] No se pudo inicializar UI:', err.message);
+  }
+}
 
 // Endpoint de verificación del estado del sistema y la base de datos (Health check)
 app.get('/api/health', async (req, res, next) => {
