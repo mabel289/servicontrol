@@ -28,6 +28,10 @@ Para demostrar en vivo la aplicación frente a tu profesor, sigue este orden:
 4. **Muestra el resultado:** La pantalla mostrará una alerta roja clara con el mensaje del backend:
    > *"Conflicto de horario: El operario Juan Carlos Pérez Morales ya tiene asignada la labor 'Mantenimiento de Piscinas' en 'Torres del Parque' de 08:00 a 12:00 en esta misma fecha."*
 5. Explica al profesor: *"Aquí aplicamos el principio de Responsabilidad Única e inversión de dependencias: la regla de negocio de intersección de intervalos se valida en el servicio del backend, garantizando que nunca se produzcan solapamientos en la base de datos relacional"*.
+6. **Notificación por Correo Institucional:**
+   - En la parte superior de la vista de Programación, haz clic en el botón verde **"Notificar por Correo"**.
+   - Muestra cómo el sistema agrupa las asignaciones por operario y despacha el correo institucional a cada uno con su tabla semanal formateada.
+   - Haz clic en **"Ver Correo"** para abrir en vivo el HTML corporativo que recibe el operario en su buzón.
 
 ### Paso 4: DEMOSTRACIÓN MÓDULO PRIORITARIO 2 - Operario Offline y Evidencias Fotográficas
 1. Cierra sesión como Administrador y haz clic en el botón de acceso rápido **"Operario: operario1@servicontrol.com"**.
@@ -81,6 +85,10 @@ Para demostrar en vivo la aplicación frente a tu profesor, sigue este orden:
 ### Pregunta 5: "¿Por qué utilizaron PostgreSQL y no MongoDB?"
 **Tu respuesta:**
 > *"Porque el negocio de ServiControl exige consistencia inmediata e integridad referencial estricta. El registro de horarios de entrada/salida y la asignación semanal tienen validez legal y laboral. MongoDB ofrece consistencia eventual pero no integridad relacional fuerte mediante Foreign Keys. PostgreSQL 17 nos garantiza transacciones ACID, tipos de datos enum seguros, índices de búsqueda rápida y prevención de registros huérfanos."*
+
+### Pregunta 6: "¿Cómo se implementó la notificación de la programación semanal al correo institucional?"
+**Tu respuesta:**
+> *"Implementamos un servicio desacoplado `MailerService` en la capa de infraestructura utilizando `nodemailer`. Cuando el administrador publica o notifica la programación, el servicio agrupa todas las asignaciones por operario y genera una plantilla HTML corporativa y responsive con el detalle de días, horas estimadas, centros de trabajo e instrucciones preventivas. Para la sustentación y pruebas académicas, el sistema cuenta con triple estrategia: SMTP real, Ethereal Mail y un visor HTML local offline (`/uploads/mails/`), lo que permite demostrar en vivo el correo recibido con un solo clic."*
 
 ---
 

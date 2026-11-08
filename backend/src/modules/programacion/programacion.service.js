@@ -1,6 +1,7 @@
 import prisma from '../../database/prisma.js';
 import { AppError } from '../../utils/appError.js';
 import { EstadoActividad, EstadoProgramacion } from '@prisma/client';
+import { mailerService } from '../../infrastructure/mail/mailer.service.js';
 
 export class ProgramacionService {
   /**
@@ -229,6 +230,83 @@ export class ProgramacionService {
     return await prisma.asignacionActividad.delete({
       where: { id: asignacionId }
     });
+  }
+
+  /**
+   * Notifica por correo institucional la programación semanal a todos los operarios asignados.
+   * @param {string} programacionId
+   */
+  static async notificarProgramacion(programacionId) {
+    const programacion = await prisma.programacionSemanal.findUnique({
+      where: { id: programacionId },
+      include: {
+        asignaciones: {
+          include: {
+            centroTrabajo: true,
+            tipoActividad: true,
+            operario: {
+              include: {
+                usuario: {
+                  select: { nombres: true, apellidos: true, email: true }
+                }
+              }
+            }
+          },
+          orderBy: [
+            { fecha: 'asc' },
+            { horaInicioEstimada: 'asc' }
+          ]
+        }
+      }
+    });
+
+    if (!programacion) {
+      throw new AppError('Programación semanal no encontrada', 404);
+    }
+
+    if (!programacion.asignaciones || programacion.asignaciones.length === 0) {
+      throw new AppError('La programación no tiene asignaciones para notificar a los operarios', 400);
+    }
+
+    // Agrupar asignaciones por operario
+    const asignacionesPorOperario = new Map();
+    for (const asig of programacion.asignaciones) {
+      const operarioId = asig.operarioId;
+      if (!asignacionesPorOperario.has(operarioId)) {
+        asignacionesPorOperario.set(operarioId, {
+          operarioNombre: `${asig.operario.usuario.nombres} ${asig.operario.usuario.apellidos}`,
+          email: asig.operario.usuario.email,
+          asignaciones: []
+        });
+      }
+      asignacionesPorOperario.get(operarioId).asignaciones.push(asig);
+    }
+
+    const envios = [];
+    for (const [, info] of asignacionesPorOperario) {
+      if (info.email) {
+        const resultadoEnvio = await mailerService.enviarProgramacionSemanal({
+          destinatario: info.email,
+          operarioNombre: info.operarioNombre,
+          semana: programacion.semana,
+          asignaciones: info.asignaciones
+        });
+        envios.push({
+          operario: info.operarioNombre,
+          email: info.email,
+          cantidadActividades: info.asignaciones.length,
+          previewUrl: resultadoEnvio.previewUrl,
+          messageId: resultadoEnvio.messageId
+        });
+      }
+    }
+
+    return {
+      programacionId: programacion.id,
+      semana: programacion.semana,
+      totalNotificados: envios.length,
+      envios
+    };
   }
 }
 

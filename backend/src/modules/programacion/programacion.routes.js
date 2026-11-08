@@ -35,6 +35,12 @@ router.post(
   ProgramacionController.asignarActividad
 );
 
+router.post(
+  '/:id/notificar',
+  authorize('ADMINISTRADOR', 'ADMINISTRATIVO'),
+  ProgramacionController.notificar
+);
+
 router.delete(
   '/asignaciones/:id',
   authorize('ADMINISTRADOR', 'ADMINISTRATIVO'),

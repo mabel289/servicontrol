@@ -12,6 +12,9 @@ export const ProgramacionPage = () => {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [showNewProgModal, setShowNewProgModal] = useState(false);
+  const [showMailModal, setShowMailModal] = useState(false);
+  const [sendingMail, setSendingMail] = useState(false);
+  const [mailResults, setMailResults] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
   const [successMsg, setSuccessMsg] = useState(null);
 
@@ -135,6 +138,23 @@ export const ProgramacionPage = () => {
     }
   };
 
+  const handleNotificarOperarios = async () => {
+    if (!progSeleccionada) return;
+    setSendingMail(true);
+    setErrorMsg(null);
+    setSuccessMsg(null);
+    try {
+      const res = await programacionService.notificar(progSeleccionada.id);
+      setMailResults(res.data);
+      setShowMailModal(true);
+      setSuccessMsg(`¡Programación semanal enviada exitosamente por correo a ${res.data.totalNotificados} operario(s)!`);
+    } catch (err) {
+      setErrorMsg(err.message);
+    } finally {
+      setSendingMail(false);
+    }
+  };
+
   return (
     <div className="container-fluid px-4 my-4">
       <div className="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
@@ -148,7 +168,24 @@ export const ProgramacionPage = () => {
           </p>
         </div>
 
-        <div className="d-flex gap-2">
+        <div className="d-flex gap-2 flex-wrap">
+          <button
+            onClick={handleNotificarOperarios}
+            className="btn btn-outline-success btn-sm d-flex align-items-center gap-1"
+            disabled={!progSeleccionada || sendingMail}
+            title="Enviar programación al correo institucional de cada operario"
+          >
+            {sendingMail ? (
+              <>
+                <span className="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                Enviando correos...
+              </>
+            ) : (
+              <>
+                <i className="bi bi-envelope-paper-fill"></i> Notificar por Correo
+              </>
+            )}
+          </button>
           <button
             onClick={() => setShowNewProgModal(true)}
             className="btn btn-outline-primary btn-sm d-flex align-items-center gap-1"
@@ -492,6 +529,81 @@ export const ProgramacionPage = () => {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: CORREOS ENVIADOS */}
+      {showMailModal && mailResults && (
+        <div className="modal fade show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <div className="modal-dialog modal-lg">
+            <div className="modal-content border-0 shadow">
+              <div className="modal-header bg-success text-white">
+                <h5 className="modal-title fw-bold">
+                  <i className="bi bi-send-check-fill me-2"></i> Programación Enviada a Operarios
+                </h5>
+                <button type="button" className="btn-close btn-close-white" onClick={() => setShowMailModal(false)}></button>
+              </div>
+
+              <div className="modal-body p-4">
+                <div className="alert alert-success d-flex align-items-center gap-2 mb-3">
+                  <i className="bi bi-check-circle-fill fs-4"></i>
+                  <div>
+                    Se despachó la notificación de la <strong>Semana {mailResults.semana}</strong> a{' '}
+                    <strong>{mailResults.totalNotificados} operario(s)</strong> con su correo institucional.
+                  </div>
+                </div>
+
+                <div className="table-responsive">
+                  <table className="table table-sm align-middle table-bordered mb-0">
+                    <thead className="table-light">
+                      <tr>
+                        <th>Operario</th>
+                        <th>Correo Institucional</th>
+                        <th>Actividades</th>
+                        <th className="text-center">Vista Previa</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {mailResults.envios?.map((env, idx) => (
+                        <tr key={idx}>
+                          <td className="fw-semibold">{env.operario}</td>
+                          <td><code>{env.email}</code></td>
+                          <td>
+                            <span className="badge bg-primary">{env.cantidadActividades} asignadas</span>
+                          </td>
+                          <td className="text-center">
+                            {env.previewUrl ? (
+                              <a
+                                href={env.previewUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="btn btn-sm btn-outline-primary"
+                              >
+                                <i className="bi bi-eye-fill me-1"></i> Ver Correo (Ethereal)
+                              </a>
+                            ) : (
+                              <span className="badge bg-secondary">Enviado por SMTP</span>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                <div className="small text-muted mt-3">
+                  <i className="bi bi-info-circle me-1"></i>
+                  Para fines académicos y de sustentación, los correos son procesados vía <strong>Ethereal Mail (Nodemailer)</strong>. Haz clic en <em>"Ver Correo"</em> para visualizar el HTML interactivo exactamente como lo ve el operario en su bandeja de entrada.
+                </div>
+              </div>
+
+              <div className="modal-footer bg-light">
+                <button type="button" className="btn btn-primary btn-sm" onClick={() => setShowMailModal(false)}>
+                  Entendido
+                </button>
+              </div>
             </div>
           </div>
         </div>

@@ -43,6 +43,7 @@ flowchart LR
         CU8(Sincronizar Lote Offline con IndexedDB)
         CU9(Revisar y Dictaminar Trabajos Presenciales)
         CU10(Consultar Reportes e Indicadores de Calidad)
+        CU11(Notificar Programación por Correo Institucional)
     end
 
     Admin --> CU1
@@ -50,6 +51,7 @@ flowchart LR
     Admin --> CU3
     Admin --> CU4
     Admin --> CU10
+    Admin --> CU11
 
     Operario --> CU1
     Operario --> CU5
@@ -359,3 +361,4 @@ flowchart TB
 | **D3** | Riesgo de duplicación de asistencias y evidencias cuando 150 operarios recuperan conectividad y reintentan sincronizar. | 1. IDs autoincrementales asignados por el servidor.<br>2. Identificadores UUID v4 generados en el dispositivo móvil con validación de idempotencia en backend. | **UUID v4 en cliente + Sincronización Idempotente en Backend** | Al generarse el UUID en el móvil desconectado, si la sincronización sufre un microcorte y se reintenta, el backend detecta el `syncUuid UNIQUE` y no duplica el registro, respondiendo confirmación limpia al cliente. |
 | **D4** | Conflicto de asignaciones múltiples a un mismo operario en horarios solapados durante la semana. | 1. Dejar la validación al criterio humano del administrador.<br>2. Validación visual únicamente en frontend.<br>3. Algoritmo de validación de intervalos temporales en la capa de servicios del backend. | **Algoritmo de Intersección de Intervalos en Servicio Backend** | Siguiendo el principio de no confiar únicamente en el frontend, la regla de negocio $A_{inicio} < B_{fin} \land A_{fin} > B_{inicio}$ se ejecuta en `ProgramacionService`. Si hay conflicto, rechaza con HTTP 409 protegiendo la integridad horaria. |
 | **D5** | Supervisión sin justificación en casos de rechazo de trabajos. | 1. Permitir rechazar sin observaciones.<br>2. Validar motivo obligatorio en backend y frontend. | **Validación de Rechazo con Observación Obligatoria (Zod + Backend)** | La calidad del servicio exige que si una labor de jardinería o piscina es rechazada, el operario conozca con exactitud qué corregir. La capa de validación rechaza con HTTP 400 cualquier rechazo con menos de 10 caracteres de observación. |
+| **D6** | Notificación semanal formal al correo institucional de los ~150 operarios sin depender de conectividad externa constante en el entorno evaluativo. | 1. Exigir credenciales SMTP comerciales de Gmail/Outlook.<br>2. Servicio desacoplado de mensajería (MailerService con Nodemailer) soportando SMTP real, Ethereal Mail y visor HTML local (`/uploads/mails/`). | **MailerService desacoplado con triple estrategia de transporte** | Permite notificar a los operarios su cronograma semanal formateado con tablas de horarios, conjunto e instrucciones. En el entorno de sustentación académica genera enlaces de previsualización inmediata para el jurado sin requerir credenciales privadas externas. |

@@ -72,5 +72,14 @@ export class ProgramacionController {
       message: 'Asignación de actividad cancelada y eliminada'
     });
   });
+
+  static notificar = asyncHandler(async (req, res) => {
+    const resultado = await ProgramacionService.notificarProgramacion(req.params.id);
+    res.status(200).json({
+      status: 'success',
+      message: `Programación semanal notificada a ${resultado.totalNotificados} operario(s)`,
+      data: resultado
+    });
+  });
 }
 

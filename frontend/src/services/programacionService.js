@@ -36,6 +36,11 @@ export const programacionService = {
       params: fecha ? { fecha } : {}
     });
     return res.data.actividades;
+  },
+
+  async notificar(id) {
+    const res = await apiClient.post(`/programacion/${id}/notificar`);
+    return res.data;
   }
 };
 
