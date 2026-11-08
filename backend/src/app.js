@@ -30,8 +30,15 @@ const localIpRegex = /^http:\/\/(localhost|127\.0\.0\.1|192\.168\.\d+\.\d+|10\.\
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Permitir en desarrollo peticiones de la red local (celulares, tablets) o dominios autorizados
-    if (!origin || env.isDev || allowedOrigins.includes(origin) || localIpRegex.test(origin)) {
+    // Permitir en desarrollo, red local, Vercel o dominios autorizados
+    if (
+      !origin ||
+      env.isDev ||
+      allowedOrigins.includes(origin) ||
+      localIpRegex.test(origin) ||
+      origin.endsWith('.vercel.app') ||
+      origin.endsWith('.onrender.com')
+    ) {
       callback(null, true);
     } else {
       callback(new AppError('No permitido por la política de CORS', 403));
