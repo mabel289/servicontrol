@@ -38,12 +38,5 @@ const swaggerOptions = {
   apis: ['./src/modules/**/*.js', './src/app.js']
 };
 
-let swaggerSpec = {};
-try {
-  swaggerSpec = swaggerJsdoc(swaggerOptions);
-} catch (e) {
-  console.warn('[Swagger] Documentación interactiva deshabilitada en serverless:', e.message);
-}
-
-export { swaggerSpec };
+export const swaggerSpec = swaggerJsdoc(swaggerOptions);
 
