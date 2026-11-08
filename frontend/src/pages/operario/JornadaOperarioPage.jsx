@@ -212,10 +212,41 @@ export const JornadaOperarioPage = () => {
       });
 
       await actualizarContadorPendientes();
-      setMensaje({
-        tipo: 'success',
-        texto: `Foto del ${tipoFoto} capturada y comprimida (-${Math.round((1 - comprimida.compressedSize / comprimida.originalSize) * 100)}% de peso)`
-      });
+
+      // Si hay conexión, subir de inmediato al servidor
+      if (navigator.onLine) {
+        try {
+          const formData = new FormData();
+          formData.append('foto', comprimida.blob, `${tipoFoto}_${Date.now()}.jpg`);
+          formData.append('ejecucionId', asigId);
+          formData.append('tipoEvidencia', tipoFoto);
+          formData.append('fechaCaptura', new Date().toISOString());
+          formData.append('syncUuid', syncUuid);
+
+          await apiClient.post('/evidencias', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+          });
+
+          await offlineQueue.limpiarConfirmados([], [syncUuid]);
+          await actualizarContadorPendientes();
+
+          setMensaje({
+            tipo: 'success',
+            texto: `Foto del ${tipoFoto} subida y sincronizada con éxito (-${Math.round((1 - comprimida.compressedSize / comprimida.originalSize) * 100)}% de peso)`
+          });
+        } catch (uploadErr) {
+          console.warn('Subida encolada en IndexedDB:', uploadErr.message);
+          setMensaje({
+            tipo: 'info',
+            texto: `Foto del ${tipoFoto} guardada en el celular (se subirá al sincronizar)`
+          });
+        }
+      } else {
+        setMensaje({
+          tipo: 'warning',
+          texto: `Foto del ${tipoFoto} guardada en el celular (modo sin conexión)`
+        });
+      }
     } catch (err) {
       setMensaje({ tipo: 'danger', texto: 'Error al procesar fotografía: ' + err.message });
     }
@@ -245,7 +276,9 @@ export const JornadaOperarioPage = () => {
         await apiClient.post('/ejecucion/finalizar', datos);
         await offlineQueue.limpiarConfirmados([syncUuid]);
         await actualizarContadorPendientes();
-        setMensaje({ tipo: 'success', texto: 'Actividad finalizada y enviada a revisión' });
+        // Sincronizar de inmediato cualquier foto o evidencia que haya quedado en cola
+        await sincronizarAhora();
+        setMensaje({ tipo: 'success', texto: '¡Actividad finalizada y evidencias enviadas a revisión del supervisor!' });
       } catch (err) {
         console.warn('Finalización encolada offline:', err.message);
         setMensaje({ tipo: 'info', texto: 'Actividad finalizada en modo offline (pendiente de sincronización)' });

@@ -26,11 +26,39 @@ export class EvidenciasService {
       return existente;
     }
 
+    // 1. Resolver el id real de la ejecución (acepta id de ejecución o id de asignación)
+    let ejecucion = await prisma.ejecucionActividad.findUnique({
+      where: { id: ejecucionId }
+    });
+
+    if (!ejecucion) {
+      ejecucion = await prisma.ejecucionActividad.findFirst({
+        where: { asignacionId: ejecucionId }
+      });
+    }
+
+    if (!ejecucion) {
+      const asignacion = await prisma.asignacionActividad.findUnique({
+        where: { id: ejecucionId }
+      });
+      if (asignacion) {
+        ejecucion = await prisma.ejecucionActividad.create({
+          data: {
+            asignacionId: asignacion.id,
+            horaInicioReal: new Date(),
+            syncUuid: crypto.randomUUID()
+          }
+        });
+      } else {
+        throw new AppError('No se encontró la ejecución o asignación para esta evidencia', 404);
+      }
+    }
+
     const fechaCapturaDate = fechaCaptura ? new Date(fechaCaptura) : new Date();
 
     return await prisma.evidenciaFotografica.create({
       data: {
-        ejecucionId,
+        ejecucionId: ejecucion.id,
         tipoEvidencia,
         urlArchivo: `/uploads/${file.filename}`,
         nombreArchivo: file.originalname,
