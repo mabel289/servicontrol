@@ -336,3 +336,4 @@ export const SupervisionPage = () => {
     </div>
   );
 };
+

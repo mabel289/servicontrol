@@ -1,10 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { apiClient } from '../../services/apiClient';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 
 export const DashboardPage = () => {
   const { user, role } = useAuth();
+
+  // El operario es redirigido directamente a su interfaz móvil de campo
+  if (role === 'OPERARIO') {
+    return <Navigate to="/operario/jornada" replace />;
+  }
+
   const [stats, setStats] = useState({
     usuariosTotal: 0,
     centrosTotal: 0,

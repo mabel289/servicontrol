@@ -262,26 +262,37 @@ export const JornadaOperarioPage = () => {
             </small>
           </div>
 
-          <button
-            onClick={sincronizarAhora}
-            className="btn btn-sm btn-outline-primary d-flex align-items-center gap-2"
-            disabled={isSyncing || !isOnline}
-          >
-            {isSyncing ? (
-              <>
-                <span className="spinner-border spinner-border-sm" role="status"></span>
-                <span>Sincronizando...</span>
-              </>
-            ) : (
-              <>
-                <i className="bi bi-arrow-repeat"></i>
-                <span>Sincronizar</span>
-                {pendingCount > 0 && (
-                  <span className="badge bg-danger">{pendingCount}</span>
-                )}
-              </>
-            )}
-          </button>
+          <div className="d-flex align-items-center gap-2">
+            <button
+              onClick={cargarDatos}
+              className="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1"
+              title="Refrescar asignaciones del servidor"
+            >
+              <i className="bi bi-arrow-clockwise"></i>
+              <span>Actualizar</span>
+            </button>
+
+            <button
+              onClick={sincronizarAhora}
+              className="btn btn-sm btn-outline-primary d-flex align-items-center gap-2"
+              disabled={isSyncing || !isOnline}
+            >
+              {isSyncing ? (
+                <>
+                  <span className="spinner-border spinner-border-sm" role="status"></span>
+                  <span>Sincronizando...</span>
+                </>
+              ) : (
+                <>
+                  <i className="bi bi-arrow-repeat"></i>
+                  <span>Sincronizar</span>
+                  {pendingCount > 0 && (
+                    <span className="badge bg-danger">{pendingCount}</span>
+                  )}
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -338,9 +349,14 @@ export const JornadaOperarioPage = () => {
       </div>
 
       {/* SECCIÓN 2: MIS ACTIVIDADES Y EVIDENCIAS FOTOGRÁFICAS */}
-      <h2 className="h6 fw-bold text-brand-dark mb-2 d-flex align-items-center gap-2">
-        <i className="bi bi-list-task text-primary"></i> Actividades Asignadas para Hoy
-      </h2>
+      <div className="d-flex justify-content-between align-items-center mb-2">
+        <h2 className="h6 fw-bold text-brand-dark m-0 d-flex align-items-center gap-2">
+          <i className="bi bi-list-task text-primary"></i> Mis Actividades Asignadas
+        </h2>
+        <span className="badge bg-primary-subtle text-primary border border-primary-subtle">
+          {actividades.length} {actividades.length === 1 ? 'tarea' : 'tareas'}
+        </span>
+      </div>
 
       {loading ? (
         <div className="text-center py-4 text-secondary">
@@ -375,7 +391,15 @@ export const JornadaOperarioPage = () => {
               </div>
 
               <div className="small text-secondary mb-3">
-                <i className="bi bi-clock me-1"></i> Horario: {act.horaInicioEstimada} - {act.horaFinEstimada}
+                <div className="d-flex align-items-center gap-2 flex-wrap mb-1">
+                  <span className="badge bg-light text-dark border">
+                    <i className="bi bi-calendar-event me-1 text-primary"></i>
+                    {new Date(act.fecha).toLocaleDateString(undefined, { timeZone: 'UTC', weekday: 'short', day: '2-digit', month: 'short' })}
+                  </span>
+                  <span className="badge bg-secondary-subtle text-secondary border">
+                    <i className="bi bi-clock me-1"></i> {act.horaInicioEstimada} - {act.horaFinEstimada}
+                  </span>
+                </div>
                 {act.instrucciones && (
                   <div className="mt-1 p-2 bg-light rounded text-dark">
                     <strong>Instrucción:</strong> {act.instrucciones}

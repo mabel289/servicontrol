@@ -19,3 +19,4 @@ export const evaluarActividadSchema = z.object({
   message: 'Al rechazar una actividad es obligatorio registrar una observación detallada (mínimo 10 caracteres)',
   path: ['observaciones']
 });
+

@@ -5,6 +5,7 @@ export const offlineQueue = {
   async guardarActividadesLocal(actividades) {
     const db = await getOfflineDB();
     const tx = db.transaction('actividades', 'readwrite');
+    await tx.store.clear(); // Limpiar previas para asegurar sincronía exacta con el servidor
     for (const act of actividades) {
       await tx.store.put(act);
     }

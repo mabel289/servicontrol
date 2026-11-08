@@ -6,3 +6,4 @@ export const reportesService = {
     return res.data;
   }
 };
+

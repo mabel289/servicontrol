@@ -26,10 +26,12 @@ const app = express();
 
 // Configuración de CORS
 const allowedOrigins = [env.clientUrl, 'http://localhost:5173', 'http://127.0.0.1:5173'];
+const localIpRegex = /^http:\/\/(localhost|127\.0\.0\.1|192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+|172\.(1[6-9]|2\d|3[0-1])\.\d+\.\d+)(:\d+)?$/;
+
 app.use(cors({
   origin: (origin, callback) => {
-    // Permitir peticiones sin origin (como Postman o curl) o de dominios autorizados
-    if (!origin || allowedOrigins.includes(origin)) {
+    // Permitir en desarrollo peticiones de la red local (celulares, tablets) o dominios autorizados
+    if (!origin || env.isDev || allowedOrigins.includes(origin) || localIpRegex.test(origin)) {
       callback(null, true);
     } else {
       callback(new AppError('No permitido por la política de CORS', 403));
