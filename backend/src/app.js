@@ -5,6 +5,10 @@ import { AppError } from './utils/appError.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 import prisma from './database/prisma.js';
 
+// Importación de rutas modulares
+import authRoutes from './modules/auth/auth.routes.js';
+import usuariosRoutes from './modules/usuarios/usuarios.routes.js';
+
 const app = express();
 
 // Configuración de CORS
@@ -58,6 +62,10 @@ app.get('/api/health', async (req, res, next) => {
     next(new AppError(`Error conectando con la base de datos: ${error.message}`, 500));
   }
 });
+
+// Rutas de la API REST
+app.use('/api/auth', authRoutes);
+app.use('/api/usuarios', usuariosRoutes);
 
 // Manejo de rutas no encontradas (404)
 app.use((req, res, next) => {
