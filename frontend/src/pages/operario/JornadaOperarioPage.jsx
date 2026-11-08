@@ -5,6 +5,7 @@ import { programacionService } from '../../services/programacionService';
 import { offlineQueue } from '../../offline/offlineQueue';
 import { compressImage } from '../../offline/imageCompressor';
 import { apiClient } from '../../services/apiClient';
+import { generateUUID } from '../../utils/uuid';
 
 export const JornadaOperarioPage = () => {
   const { user } = useAuth();
@@ -43,8 +44,10 @@ export const JornadaOperarioPage = () => {
             setAsistenciaHoy(resAsistencia.data.asistencia);
             await offlineQueue.guardarAsistenciaHoyLocal(resAsistencia.data.asistencia);
           }
+          setMensaje({ tipo: 'success', texto: `Sincronizado: ${remoteActs.length} actividades asignadas.` });
         } catch (netErr) {
           console.warn('Operando con datos cacheados en IndexedDB:', netErr.message);
+          setMensaje({ tipo: 'warning', texto: 'Aviso al consultar servidor: ' + netErr.message });
         }
       }
     } catch (err) {
@@ -61,7 +64,7 @@ export const JornadaOperarioPage = () => {
 
   // --- ASISTENCIA: ENTRADA ---
   const handleRegistrarEntrada = async (centroTrabajoId) => {
-    const syncUuid = crypto.randomUUID();
+    const syncUuid = generateUUID();
     const hoyStr = new Date().toISOString().split('T')[0];
     const ahoraIso = new Date().toISOString();
 
@@ -102,7 +105,7 @@ export const JornadaOperarioPage = () => {
     if (!asistenciaHoy) return;
 
     const ahoraIso = new Date().toISOString();
-    const syncUuidSalida = crypto.randomUUID();
+    const syncUuidSalida = generateUUID();
 
     const salidaData = {
       tipo: 'SALIDA',
@@ -140,30 +143,39 @@ export const JornadaOperarioPage = () => {
 
   // --- EJECUCIÓN: INICIAR ACTIVIDAD ---
   const handleIniciarActividad = async (asigId) => {
-    const syncUuid = crypto.randomUUID();
-    const ahoraIso = new Date().toISOString();
+    try {
+      const syncUuid = generateUUID();
+      const ahoraIso = new Date().toISOString();
 
-    const datos = {
-      accion: 'INICIAR',
-      asignacionId: asigId,
-      horaInicioReal: ahoraIso,
-      syncUuid
-    };
+      const datos = {
+        accion: 'INICIAR',
+        asignacionId: asigId,
+        horaInicioReal: ahoraIso,
+        syncUuid
+      };
 
-    // Actualizar estado localmente en IndexedDB
-    await offlineQueue.encolarEjecucion(datos);
-    await offlineQueue.actualizarActividadLocal(asigId, { estado: 'EN_PROCESO' });
-    setActividades(prev => prev.map(a => a.id === asigId ? { ...a, estado: 'EN_PROCESO' } : a));
-    await actualizarContadorPendientes();
+      // Actualizar estado localmente en IndexedDB
+      await offlineQueue.encolarEjecucion(datos);
+      await offlineQueue.actualizarActividadLocal(asigId, { estado: 'EN_PROCESO' });
+      setActividades(prev => prev.map(a => a.id === asigId ? { ...a, estado: 'EN_PROCESO' } : a));
+      await actualizarContadorPendientes();
 
-    if (navigator.onLine) {
-      try {
-        await apiClient.post('/ejecucion/iniciar', datos);
-        await offlineQueue.limpiarConfirmados([syncUuid]);
-        await actualizarContadorPendientes();
-      } catch (err) {
-        console.warn('Inicio encolado offline:', err.message);
+      if (navigator.onLine) {
+        try {
+          await apiClient.post('/ejecucion/iniciar', datos);
+          await offlineQueue.limpiarConfirmados([syncUuid]);
+          await actualizarContadorPendientes();
+          setMensaje({ tipo: 'success', texto: '¡Actividad iniciada con éxito! Ya puedes tomar las fotos de evidencia.' });
+        } catch (err) {
+          console.warn('Inicio encolado offline:', err.message);
+          setMensaje({ tipo: 'info', texto: 'Actividad iniciada en modo local (se sincronizará al haber conexión).' });
+        }
+      } else {
+        setMensaje({ tipo: 'warning', texto: 'Actividad iniciada en el teléfono (modo sin internet).' });
       }
+    } catch (error) {
+      console.error('Error al iniciar:', error);
+      setMensaje({ tipo: 'danger', texto: 'Error al iniciar actividad: ' + error.message });
     }
   };
 
@@ -174,7 +186,7 @@ export const JornadaOperarioPage = () => {
     try {
       // Compresión en el navegador con Canvas API
       const comprimida = await compressImage(file, 1280, 0.7);
-      const syncUuid = crypto.randomUUID();
+      const syncUuid = generateUUID();
 
       // Guardar previsualización en el estado
       setFotosLocales(prev => ({
@@ -211,7 +223,7 @@ export const JornadaOperarioPage = () => {
 
   // --- EJECUCIÓN: FINALIZAR ACTIVIDAD ---
   const handleFinalizarActividad = async (asigId, observaciones) => {
-    const syncUuid = crypto.randomUUID();
+    const syncUuid = generateUUID();
     const ahoraIso = new Date().toISOString();
 
     const datos = {
@@ -246,7 +258,7 @@ export const JornadaOperarioPage = () => {
   return (
     <div className="container-fluid px-3 my-3" style={{ maxWidth: '640px' }}>
       {/* BARRA DE ESTADO DE CONEXIÓN Y COLA OFFLINE */}
-      <div className="card card-dashboard p-3 bg-white mb-3">
+      <div className="card card-dashboard p-3 bg-white mb-2">
         <div className="d-flex justify-content-between align-items-center flex-wrap gap-2">
           <div>
             <div className="d-flex align-items-center gap-2">
@@ -256,9 +268,7 @@ export const JornadaOperarioPage = () => {
               </span>
             </div>
             <small className="text-secondary d-block mt-1">
-              {isOnline 
-                ? 'Los registros se sincronizan automáticamente con el servidor.' 
-                : 'La información se guarda de forma segura en tu teléfono.'}
+              Sesión activa: <strong className="text-dark">{user?.nombres} {user?.apellidos}</strong> ({user?.operario?.codigoInstitucional || 'OP-101'})
             </small>
           </div>
 
