@@ -145,9 +145,10 @@ export const ProgramacionPage = () => {
     setSuccessMsg(null);
     try {
       const res = await programacionService.notificar(progSeleccionada.id);
-      setMailResults(res.data);
+      const data = res?.data || res;
+      setMailResults(data);
       setShowMailModal(true);
-      setSuccessMsg(`¡Programación semanal enviada exitosamente por correo a ${res.data.totalNotificados} operario(s)!`);
+      setSuccessMsg(`¡Programación semanal enviada exitosamente por correo a ${data?.totalNotificados ?? 0} operario(s)!`);
     } catch (err) {
       setErrorMsg(err.message);
     } finally {
